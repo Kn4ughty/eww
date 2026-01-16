@@ -142,6 +142,11 @@ pub enum ActionWithServer {
         #[arg(long = "toggle")]
         should_toggle: bool,
 
+        /// If a window of this name is already open dont close it and instead create a duplicate.
+        /// Useful for bars you want to put on multiple monitors automatically
+        #[arg(long = "allow-duplicates")]
+        allow_duplicates: bool,
+
         /// Automatically close the window after a specified amount of time, i.e.: 1s
         #[arg(long, value_parser=parse_duration)]
         duration: Option<std::time::Duration>,
@@ -277,7 +282,18 @@ impl ActionWithServer {
             ActionWithServer::OpenMany { windows, args, should_toggle } => {
                 return with_response_channel(|sender| app::DaemonCommand::OpenMany { windows, args, should_toggle, sender });
             }
-            ActionWithServer::OpenWindow { window_name, id, pos, size, screen, anchor, should_toggle, duration, args } => {
+            ActionWithServer::OpenWindow {
+                window_name,
+                id,
+                pos,
+                size,
+                screen,
+                anchor,
+                should_toggle,
+                allow_duplicates,
+                duration,
+                args,
+            } => {
                 return with_response_channel(|sender| app::DaemonCommand::OpenWindow {
                     window_name,
                     instance_id: id,
@@ -287,6 +303,7 @@ impl ActionWithServer {
                     screen,
                     should_toggle,
                     duration,
+                    allow_duplicates,
                     sender,
                     args,
                 })

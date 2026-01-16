@@ -30,6 +30,7 @@ pub struct WindowArguments {
     pub monitor: Option<MonitorIdentifier>,
     pub pos: Option<Coords>,
     pub size: Option<Coords>,
+    pub allow_duplicates: bool,
 }
 
 impl WindowArguments {
@@ -45,6 +46,7 @@ impl WindowArguments {
                 .map(|x| x.as_duration())
                 .transpose()
                 .context("Not a valid duration")?,
+            allow_duplicates: parse_value_from_args::<bool>("allow_duplicates", &mut args)?.unwrap_or(false),
             args,
         };
 

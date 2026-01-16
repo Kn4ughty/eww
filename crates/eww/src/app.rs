@@ -62,6 +62,7 @@ pub enum DaemonCommand {
         anchor: Option<AnchorPoint>,
         screen: Option<MonitorIdentifier>,
         should_toggle: bool,
+        allow_duplicates: bool,
         duration: Option<std::time::Duration>,
         sender: DaemonResponseSender,
         args: Option<Vec<(VarName, DynVal)>>,
@@ -256,6 +257,7 @@ impl<B: DisplayBackend> App<B> {
                 should_toggle,
                 duration,
                 sender,
+                allow_duplicates,
                 args,
             } => {
                 let instance_id = instance_id.unwrap_or_else(|| window_name.clone());
@@ -273,6 +275,7 @@ impl<B: DisplayBackend> App<B> {
                         monitor,
                         anchor,
                         duration,
+                        allow_duplicates,
                         args: args.unwrap_or_default().into_iter().collect(),
                     })
                 };
@@ -424,9 +427,11 @@ impl<B: DisplayBackend> App<B> {
         self.failed_windows.remove(instance_id);
         log::info!("Opening window {} as '{}'", window_args.window_name, instance_id);
 
-        // if an instance of this is already running, close it
-        if self.open_windows.contains_key(instance_id) {
-            self.close_window(instance_id, false)?;
+        if !window_args.allow_duplicates {
+            // if an instance of this is already running, close it
+            if self.open_windows.contains_key(instance_id) {
+                self.close_window(instance_id, false)?;
+            }
         }
 
         self.instance_id_to_args.insert(instance_id.to_string(), window_args.clone());
